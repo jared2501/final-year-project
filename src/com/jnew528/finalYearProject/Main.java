@@ -15,19 +15,33 @@ public class Main {
 
 	public static void main(String[] args) throws Exception{
 		// Game type settings
+<<<<<<< HEAD
 		int numberOfGames = 2000;
+=======
+		int numberOfGames = 4000;
+>>>>>>> 1f924924d9de79e1fe1cb1623df5b6e91b067c89
 		String gameType = "LeftRight";
 		int boardSize = 100;
 
 		// Iteration settings
+<<<<<<< HEAD
 		int iterationsStart = 325;
 		int iterationsEnd = 2000;
 		int iterationsStep = 25;
+=======
+		int iterationsStart = 5;
+		int iterationsEnd = 45;
+		int iterationsStep = 5;
+>>>>>>> 1f924924d9de79e1fe1cb1623df5b6e91b067c89
 		int maxNum = 100;
 
 		// New DIR name
 		long unixTime = System.currentTimeMillis() / 1000L;
+<<<<<<< HEAD
 		String newDirName = "Dropbox" + System.getProperty("file.separator") + "4thyearproj" + System.getProperty("file.separator") + unixTime +
+=======
+		String newDirName = "data" + System.getProperty("file.separator") + unixTime +
+>>>>>>> 1f924924d9de79e1fe1cb1623df5b6e91b067c89
 				"_UpdateAllEvil_" + gameType +
 				"_boardsize_" + boardSize +
 				"_numberOfGames_" + numberOfGames +
