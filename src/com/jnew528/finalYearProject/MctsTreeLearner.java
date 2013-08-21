@@ -2,7 +2,7 @@ package com.jnew528.finalYearProject;
 
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Edge;
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Node;
-import com.jnew528.finalYearProject.DirectedAcyclicGraph.UpdatePath;
+import com.jnew528.finalYearProject.DirectedAcyclicGraph.Policies;
 
 import java.util.HashMap;
 
@@ -35,6 +35,6 @@ public class MctsTreeLearner<T> extends MctsTreeUpdatePath {
 			performIteration(root, encounteredGameStates);
 		}
 
-		return UpdatePath.selectRobustRootMove(root);
+		return Policies.selectRobustRootMove(root);
 	}
 }

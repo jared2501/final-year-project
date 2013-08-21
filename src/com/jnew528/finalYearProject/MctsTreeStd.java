@@ -2,8 +2,7 @@ package com.jnew528.finalYearProject;
 
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Edge;
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Node;
-import com.jnew528.finalYearProject.DirectedAcyclicGraph.UpdateAll;
-import com.jnew528.finalYearProject.DirectedAcyclicGraph.UpdatePath;
+import com.jnew528.finalYearProject.DirectedAcyclicGraph.Policies;
 
 import java.util.Random;
 import java.util.Vector;
@@ -33,7 +32,7 @@ public class MctsTreeStd implements MctsTree {
 
 		// Select child with the selection policy
 		// In this case, the child with the highest number of visits
-		return UpdateAll.selectRobustRootMove(root);
+		return Policies.selectRobustRootMove(root);
 	}
 
 	public void performIteration(Node root) {
@@ -42,7 +41,7 @@ public class MctsTreeStd implements MctsTree {
 		// Traverse the tree until we reach an expandable node
 		// ie a node that has untried moves and non-terminal
 		while(!node.hasUntriedMoves() && node.hasChildren()) {
-			node = UpdateAll.uctSelectChild(node);
+			node = Policies.uct0SelectChild(node).getHead();
 		}
 
 		// Expand the node if it has untried moves
@@ -74,10 +73,14 @@ public class MctsTreeStd implements MctsTree {
 
 			// Since each node should only have one parent edge!
 			assert(node.getParentEdges().size() == 1 || node.getParentEdges().size() == 0);
+
 			if(node.getParentEdges().size() == 0) {
 				break;
 			} else {
-				node = node.getParentEdges().get(0).getTail();
+				// Update the edge as well for shits and giggles
+				Edge parentEdge = node.getParentEdges().get(0);
+				parentEdge.update(result, 1.0);
+				node = parentEdge.getTail();
 			}
 		} while (true);
 	}

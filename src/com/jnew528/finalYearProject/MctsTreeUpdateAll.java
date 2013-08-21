@@ -2,7 +2,7 @@ package com.jnew528.finalYearProject;
 
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Edge;
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Node;
-import com.jnew528.finalYearProject.DirectedAcyclicGraph.UpdateAll;
+import com.jnew528.finalYearProject.DirectedAcyclicGraph.Policies;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -37,16 +37,17 @@ public class MctsTreeUpdateAll implements MctsTree {
 			performIteration(root, encounteredGameStates);
 		}
 
-		return UpdateAll.selectRobustRootMove(root);
+		return Policies.selectRobustRootMove(root);
 	}
 
 	public void performIteration(Node root, HashMap<GameState, Node> encounteredGameStates) {
 		Node node = root;
+		Vector<Edge> traversedEdges = new Vector();
 
 		// Traverse the tree until we reach a node on the edge of the current tree
 		// i.e. it has untried moves or is a state with no children (i.e. terminal game state)
 		select: do {
-			node = utcSelect(node);
+			node = utcSelect(node, traversedEdges);
 
 			// Expand the node if it has untried moves
 			// if it doesnt, do nothing, because it is a terminal state and doesnt need expanding
@@ -67,6 +68,7 @@ public class MctsTreeUpdateAll implements MctsTree {
 				} else {
 					Node newNode = new Node(newGameState);
 					Edge newEdge = node.addChild(newNode, move);
+					traversedEdges.add(newEdge);
 					node = newNode;
 					encounteredGameStates.put(newGameState, newNode);
 				}
@@ -76,14 +78,16 @@ public class MctsTreeUpdateAll implements MctsTree {
 			GameState finalGameState = defaultPolicy(node, startingGameState);
 
 			// Back propogate the result from the perspective of the player that just moved
-			backpropogate(node, finalGameState);
+			backpropogate(node, finalGameState, traversedEdges);
 			break;
 		} while(true);
 	}
 
-	protected Node utcSelect(Node node) {
+	protected Node utcSelect(Node node, Vector<Edge> traversedEdges) {
 		while(!node.hasUntriedMoves() && node.hasChildren()) {
-			node = UpdateAll.uctSelectChild(node);
+			Edge edge = Policies.uct2SelectChild(node);
+			traversedEdges.add(edge);
+			node = edge.getHead();
 		}
 
 		return node;
@@ -100,7 +104,7 @@ public class MctsTreeUpdateAll implements MctsTree {
 		return gameState;
 	}
 
-	protected void backpropogate(Node finalNode, GameState gameState) {
+	protected void backpropogate(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
 		Deque<Node> currentLevelQueue = new ArrayDeque();
 		HashMap<Node, Double> currentLevelHash = new HashMap();
 
@@ -113,22 +117,26 @@ public class MctsTreeUpdateAll implements MctsTree {
 
 			for(Node current : currentLevelQueue) {
 				Double currentVists = currentLevelHash.get(current);
+				Double currentResult = gameState.getResult(current.getGameState().getPlayerJustMoved(), false);
 
 				// Update the current node
-				current.update(gameState.getResult(current.getGameState().getPlayerJustMoved(), false)*currentVists, currentVists);
+				current.update(currentResult*currentVists, currentVists);
 
 				double numOfParents = (double)current.getParentEdges().size();
-				Double parentScore = currentVists/numOfParents;
+				Double parentVisits = currentVists/numOfParents;
 
 				// Go through its parents and dehoover their whatsits for next round
 				for(Edge e : current.getParentEdges()) {
+					// Update the current nodes parent edges with their parent score!
+					e.update(currentResult*parentVisits,parentVisits);
+
 					Node parent = e.getTail();
 
 					if(nextLevelHash.containsKey(parent)) {
-						nextLevelHash.put(parent, nextLevelHash.get(parent)+parentScore);
+						nextLevelHash.put(parent, nextLevelHash.get(parent)+parentVisits);
 					} else {
 						nextLevelQueue.addFirst(parent);
-						nextLevelHash.put(parent, parentScore);
+						nextLevelHash.put(parent, parentVisits);
 					}
 				}
 			}

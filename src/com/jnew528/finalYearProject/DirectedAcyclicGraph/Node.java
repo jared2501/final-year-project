@@ -75,10 +75,6 @@ public class Node {
 		this.visits += visit;
 	}
 
-	public void incrementVisits() {
-		visits = visits + 1.0;
-	}
-
 	private void addChildEdge(Edge edge) {
 		this.childEdges.add(edge);
 	}

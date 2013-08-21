@@ -10,7 +10,7 @@ import com.jnew528.finalYearProject.Move;
  * To change this template use File | Settings | File Templates.
  */
 public class Edge {
-	protected int visits;
+	protected double visits;
 	protected double wins;
 	protected Node tail;
 	protected Node head;
@@ -24,8 +24,8 @@ public class Edge {
 		this.move = move;
 	}
 
-	public void update(double result) {
-		this.visits++;
+	public void update(double result, double visit) {
+		this.visits += visit;
 		this.wins += result;
 	}
 

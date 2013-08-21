@@ -15,14 +15,14 @@ public class Main {
 
 	public static void main(String[] args) throws Exception{
 		// Game type settings
-		int numberOfGames = 8000;
+		int numberOfGames = 100;
 		String gameType = "LeftRight";
 		int boardSize = 100;
 
 		// Iteration settings
-		int iterationsStart = 5;
-		int iterationsEnd = 45;
-		int iterationsStep = 5;
+		int iterationsStart = 2000;
+		int iterationsEnd = 2000;
+		int iterationsStep = 100;
 		int maxNum = 100;
 
 		// New DIR name

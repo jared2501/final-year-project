@@ -15,7 +15,7 @@ import java.util.*;
 public class MctsTreeUpdateAllOnce extends MctsTreeUpdateAll {
 
 	@Override
-	protected void backpropogate(Node finalNode, GameState gameState) {
+	protected void backpropogate(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
 		HashSet<Node> seenNodes = new HashSet();
 		Deque<Node> stack = new ArrayDeque();
 
@@ -36,6 +36,12 @@ public class MctsTreeUpdateAllOnce extends MctsTreeUpdateAll {
 					stack.push(parent);
 				}
 			}
+		}
+
+		// Update all the traversed edges with the result
+		for(Edge e : traversedEdges) {
+			double result = gameState.getResult(e.getHead().getGameState().getPlayerJustMoved(), true);
+			e.update(result, 1.0);
 		}
 	}
 }

@@ -4,7 +4,7 @@ import java.util.*;
 
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Edge;
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Node;
-import com.jnew528.finalYearProject.DirectedAcyclicGraph.UpdatePath;
+import com.jnew528.finalYearProject.DirectedAcyclicGraph.Policies;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,7 +38,7 @@ public class MctsTreeUpdatePath implements MctsTree {
 
 		// Select child with the selection policy
 		// In this case, the child with the highest number of visits
-		return UpdatePath.selectRobustRootMove(root);
+		return Policies.selectRobustRootMove(root);
 	}
 
 	public void performIteration(Node root, HashMap<GameState, Node> encounteredGameStates) {
@@ -80,14 +80,14 @@ public class MctsTreeUpdatePath implements MctsTree {
 			GameState finalGameState = defaultPolicy(node, startingGameState);
 
 			// Back propogate the result from the perspective of the player that just moved
-			backpropogate(traversedEdges, node, finalGameState);
+			backpropogate(traversedEdges, root, finalGameState);
 			break;
 		} while(true);
 	}
 
 	private Node utcSelect(Node node, Vector<Edge> traversedEdges) {
 		while(!node.hasUntriedMoves() && node.hasChildren()) {
-			Edge edge = UpdatePath.uctSelectChild(node);
+			Edge edge = Policies.uct1SelectChild(node);
 			traversedEdges.add(edge);
 			node = edge.getHead();
 		}
@@ -106,15 +106,16 @@ public class MctsTreeUpdatePath implements MctsTree {
 		return gameState;
 	}
 
-	private void backpropogate(Vector<Edge> traversedEdges, Node finalNode, GameState gameState) {
+	private void backpropogate(Vector<Edge> traversedEdges, Node root, GameState gameState) {
 		for(Edge edge : traversedEdges) {
 			double result = gameState.getResult(edge.getHead().getGameState().getPlayerJustMoved(), true);
-			edge.update(result);
-			edge.getTail().incrementVisits();
+			edge.update(result, 1.0);
+			edge.getHead().update(result, 1.0);
 		}
 
-		// Since the final node has no edge with a tail pointing to it!
-		finalNode.incrementVisits();
+		// Since were updating the heads the root node has no head pointing to it!
+		double result = gameState.getResult(root.getGameState().getPlayerJustMoved(), true);
+		root.update(result, 1.0);
 	}
 
 	@Override
