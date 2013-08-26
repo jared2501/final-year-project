@@ -61,9 +61,13 @@ public class Node {
 		// If the child we're trying to add doesnt exist in the tree, then add it
 		if(existingChildEdge == null) {
 			Edge newEdge = new Edge(0, 0, this, child, move);
-			this.removeUntriedMove(move);
+			if(move != null) {
+				this.removeUntriedMove(move);
+			}
+			if(child != null) {
+				child.addParentEdge(newEdge);
+			}
 			this.addChildEdge(newEdge);
-			child.addParentEdge(newEdge);
 			return newEdge;
 		} else {
 			return existingChildEdge;
