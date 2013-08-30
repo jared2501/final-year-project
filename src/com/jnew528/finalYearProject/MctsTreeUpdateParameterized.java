@@ -104,7 +104,7 @@ public class MctsTreeUpdateParameterized implements MctsTree {
 	}
 
 	protected void backpropogate(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
-		Policies.backpropogateParameterized(finalNode, gameState, traversedEdges);
+		Policies.backpropogateUpPath(finalNode, gameState, traversedEdges);
 	}
 
 	@Override

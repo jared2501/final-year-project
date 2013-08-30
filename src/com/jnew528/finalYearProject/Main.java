@@ -2,8 +2,6 @@ package com.jnew528.finalYearProject;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.nio.file.FileSystems;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.Vector;
 import java.util.concurrent.Callable;
@@ -15,20 +13,21 @@ public class Main {
 
 	public static void main(String[] args) throws Exception{
 		// Game type settings
-		int numberOfGames = 200;
+		int numberOfGames = 400;
 		String gameType = "LeftRight";
 		int boardSize = 100;
 
 		// Iteration settings
-		int iterationsStart = 200;
-		int iterationsEnd = 200;
+		int iterationsStart = 2000;
+		int iterationsEnd = 2000;
 		int iterationsStep = 100;
 		int maxNum = 100;
 
 		// New DIR name
 		long unixTime = System.currentTimeMillis() / 1000L;
 		String newDirName = "Dropbox" + System.getProperty("file.separator") + "4thyearproj" + System.getProperty("file.separator") + unixTime +
-				"_UpdateParameterized_" + gameType +
+//				"_UpdateParameterized_" + gameType +
+				"_UpdatePathUct2b_" + gameType +
 				"_boardsize_" + boardSize +
 				"_numberOfGames_" + numberOfGames +
 				"_maxNum_" + maxNum +

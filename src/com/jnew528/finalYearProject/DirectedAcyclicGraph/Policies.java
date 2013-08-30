@@ -64,7 +64,7 @@ public class Policies {
 
 		for(Edge e : node.childEdges) {
 			double Qsa = e.wins / (e.visits + 1e-10);
-			double biasTerm = Math.sqrt((2*Math.log((double)parentVisits)) / (1e-6 + e.visits)) + random.nextDouble()*1e-6;
+			double biasTerm = Math.sqrt((Math.log((double)parentVisits)) / (1e-6 + e.visits)) + random.nextDouble()*1e-6;
 			double newUctValue = Qsa + biasTerm;
 
 			if(newUctValue > highestUctValue) {
@@ -93,6 +93,33 @@ public class Policies {
 			Node child = e.head;
 			double Qgsa = child.wins / (child.visits + 1e-10); // This is the main point that differs!
 			double biasTerm = Math.sqrt((2*Math.log((double)parentVisits)) / (1e-6 + e.visits)) + random.nextDouble()*1e-6;
+			double newUctValue = Qgsa + biasTerm;
+
+			if(newUctValue > highestUctValue) {
+				highestUctValue = newUctValue;
+				selectedEdge = e;
+			}
+		}
+
+		return selectedEdge;
+	}
+
+	public static Edge uct2bSelectChild(Node node) {
+		if(node.childEdges.size() == 0) {
+			return null;
+		}
+
+		// Get parent visits
+		double parentVisits = node.visits;
+
+		// Find the highest uct edge from the child edges
+		Edge selectedEdge = node.childEdges.get(0);
+		double highestUctValue = Double.MIN_VALUE;
+
+		for(Edge e : node.childEdges) {
+			Node child = e.head;
+			double Qgsa = child.wins / (child.visits + 1e-10); // This is the main point that differs!
+			double biasTerm = Math.sqrt((2*Math.log((double)parentVisits)) / (1e-6 + child.visits)) + random.nextDouble()*1e-6;
 			double newUctValue = Qgsa + biasTerm;
 
 			if(newUctValue > highestUctValue) {
@@ -194,7 +221,7 @@ public class Policies {
 
     // Backpropagation
 
-	public static void backpropogateParameterized(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
+	public static void backpropogateUpPath(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
 		for(Edge e : traversedEdges) {
 			double result = gameState.getResult(e.getHead().getGameState().getPlayerJustMoved(), false);
 			e.update(result, 1.0);

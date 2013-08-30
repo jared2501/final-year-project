@@ -1,10 +1,12 @@
 package com.jnew528.finalYearProject;
 
-import java.util.*;
-
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Edge;
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Node;
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Policies;
+
+import java.util.HashMap;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Created with IntelliJ IDEA.
@@ -87,7 +89,7 @@ public class MctsTreeUpdatePath implements MctsTree {
 
 	private Node utcSelect(Node node, Vector<Edge> traversedEdges) {
 		while(!node.hasUntriedMoves() && node.hasChildren()) {
-			Edge edge = Policies.uct1SelectChild(node);
+			Edge edge = Policies.uct2bSelectChild(node);
 			traversedEdges.add(edge);
 			node = edge.getHead();
 		}
