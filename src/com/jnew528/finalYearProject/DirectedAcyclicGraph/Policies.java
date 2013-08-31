@@ -119,7 +119,7 @@ public class Policies {
 		for(Edge e : node.childEdges) {
 			Node child = e.head;
 			double Qgsa = child.wins / (child.visits + 1e-10); // This is the main point that differs!
-			double biasTerm = Math.sqrt((2*Math.log((double)parentVisits)) / (1e-6 + child.visits)) + random.nextDouble()*1e-6;
+			double biasTerm = Math.sqrt((2*Math.log((double)parentVisits)) / (1e-6 + child.actualVisits)) + random.nextDouble()*1e-6;
 			double newUctValue = Qgsa + biasTerm;
 
 			if(newUctValue > highestUctValue) {
@@ -224,11 +224,95 @@ public class Policies {
 	public static void backpropogateUpPath(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
 		for(Edge e : traversedEdges) {
 			double result = gameState.getResult(e.getHead().getGameState().getPlayerJustMoved(), false);
-			e.update(result, 1.0);
+			e.updateEV(result, 1.0);
+			e.incrementVisits();
 		}
 
 		double result = gameState.getResult(finalNode.getGameState().getPlayerJustMoved(), false);
-		finalNode.update(result, 1.0);
+		finalNode.updateEV(result, 1.0);
+		finalNode.incrementVisits();
+	}
+
+
+	public static void backPropagatePath_ModifyAggAllNumChild(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
+		Deque<Node> currentLevelQueue = new ArrayDeque();
+		HashMap<Node, Double> currentLevelHash = new HashMap();
+
+		currentLevelQueue.addFirst(finalNode);
+		currentLevelHash.put(finalNode, 1.0);
+
+		while(currentLevelQueue.size() > 0) {
+			Deque<Node> nextLevelQueue = new ArrayDeque();
+			HashMap<Node, Double> nextLevelHash = new HashMap();
+
+			for(Node current : currentLevelQueue) {
+				Double currentVists = currentLevelHash.get(current);
+				Double currentResult = gameState.getResult(current.getGameState().getPlayerJustMoved(), false);
+
+				// Update the current node
+				current.updateEV(currentResult*currentVists, currentVists);
+
+				double numOfParents = (double)current.getParentEdges().size();
+				Double parentVisits = currentVists/numOfParents;
+
+				// Go through its parents and dehoover their whatsits for next round
+				for(Edge e : current.getParentEdges()) {
+					// Update the current nodes parent edges with their parent score!
+					e.updateEV(currentResult*parentVisits, parentVisits);
+
+					Node parent = e.getTail();
+
+					if(nextLevelHash.containsKey(parent)) {
+						nextLevelHash.put(parent, nextLevelHash.get(parent)+parentVisits);
+					} else {
+						nextLevelQueue.addFirst(parent);
+						nextLevelHash.put(parent, parentVisits);
+					}
+				}
+			}
+
+			currentLevelHash = nextLevelHash;
+			currentLevelQueue = nextLevelQueue;
+		}
+
+		// Increment visits along path for bias term
+		for(Edge e : traversedEdges) {
+			e.incrementVisits();
+			e.getTail().incrementVisits();
+		}
+		finalNode.incrementVisits();
+	}
+
+	public static void backPropagatePath_ModifyAggAll(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
+		HashSet<Node> seenNodes = new HashSet();
+		Deque<Node> stack = new ArrayDeque();
+
+		stack.push(finalNode);
+
+		while(stack.size() > 0) {
+			Node current = stack.pop();
+
+			if(!seenNodes.contains(current)) {
+				// Update current node ONLY if we havent seen it before
+				double result = gameState.getResult(current.getGameState().getPlayerJustMoved(), true);
+				current.updateEV(result, 1.0);
+				seenNodes.add(current);
+
+				// and add parents to the stack if we havent seen them
+				for(Edge e : current.getParentEdges()) {
+					e.updateEV(result, 1.0);
+					Node parent = e.getTail();
+					stack.push(parent);
+				}
+			}
+		}
+
+		// Increment visits along path for bias term
+		for(Edge e : traversedEdges) {
+			e.incrementVisits();
+			e.getTail().incrementVisits();
+		}
+		finalNode.incrementVisits();
 	}
 
 

@@ -13,21 +13,21 @@ public class Main {
 
 	public static void main(String[] args) throws Exception{
 		// Game type settings
-		int numberOfGames = 400;
+		int numberOfGames = 500;
 		String gameType = "LeftRight";
 		int boardSize = 100;
 
 		// Iteration settings
-		int iterationsStart = 2000;
-		int iterationsEnd = 2000;
-		int iterationsStep = 100;
+		int iterationsStart = 50;
+		int iterationsEnd = 300;
+		int iterationsStep = 50;
 		int maxNum = 100;
 
 		// New DIR name
 		long unixTime = System.currentTimeMillis() / 1000L;
 		String newDirName = "Dropbox" + System.getProperty("file.separator") + "4thyearproj" + System.getProperty("file.separator") + unixTime +
 //				"_UpdateParameterized_" + gameType +
-				"_UpdatePathUct2b_" + gameType +
+				"_backPropagatePath_ModifyAggAll_Uct2b_" + gameType +
 				"_boardsize_" + boardSize +
 				"_numberOfGames_" + numberOfGames +
 				"_maxNum_" + maxNum +

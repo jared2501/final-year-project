@@ -12,6 +12,7 @@ import com.jnew528.finalYearProject.Move;
 public class Edge {
 	protected double visits;
 	protected double wins;
+	protected int actualVisits;
 	protected Node tail;
 	protected Node head;
 	protected Move move;
@@ -19,14 +20,19 @@ public class Edge {
 	public Edge(int visits, double wins, Node tail, Node head, Move move) {
 		this.visits = visits;
 		this.wins = wins;
+		this.actualVisits = 0;
 		this.tail = tail;
 		this.head = head;
 		this.move = move;
 	}
 
-	public void update(double result, double visit) {
-		this.visits += visit;
-		this.wins += result;
+	public void updateEV(double wins, double visits) {
+		this.wins += wins;
+		this.visits += visits;
+	}
+
+	public void incrementVisits() {
+		this.actualVisits++;
 	}
 
 	public Node getTail() {

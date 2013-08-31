@@ -69,7 +69,8 @@ public class MctsTreeStd implements MctsTree {
 		// Were using updateall so update the nodes!!!
 		do {
 			double result = gameState.getResult(node.getGameState().getPlayerJustMoved(), true);
-			node.update(result, 1.0);
+			node.updateEV(result, 1.0);
+			node.incrementVisits();
 
 			// Since each node should only have one parent edge!
 			assert(node.getParentEdges().size() == 1 || node.getParentEdges().size() == 0);
@@ -79,7 +80,8 @@ public class MctsTreeStd implements MctsTree {
 			} else {
 				// Update the edge as well for shits and giggles
 				Edge parentEdge = node.getParentEdges().get(0);
-				parentEdge.update(result, 1.0);
+				parentEdge.updateEV(result, 1.0);
+				parentEdge.incrementVisits();
 				node = parentEdge.getTail();
 			}
 		} while (true);

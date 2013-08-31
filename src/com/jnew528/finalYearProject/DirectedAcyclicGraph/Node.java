@@ -17,16 +17,18 @@ public class Node {
 	protected Vector<Move> untriedMoves;
 	protected Vector<Edge> parentEdges;
 	protected Vector<Edge> childEdges;
-	protected double visits;
 	protected double wins;
+	protected double visits;
+	protected int actualVisits;
 
 	public Node(GameState gameState) {
 		this.gameState = gameState;
 		this.untriedMoves = gameState.getChildMoves();
 		this.parentEdges = new Vector();
 		this.childEdges = new Vector();
-		visits = 0;
-		wins = 0;
+		this.wins = 0;
+		this.visits = 0;
+		this.actualVisits = 0;
 	}
 
 
@@ -74,9 +76,13 @@ public class Node {
 		}
 	}
 
-	public void update(double win, double visit) {
-		this.wins += win;
-		this.visits += visit;
+	public void updateEV(double wins, double visits) {
+		this.wins += wins;
+		this.visits += visits;
+	}
+
+	public void incrementVisits() {
+		this.actualVisits++;
 	}
 
 	private void addChildEdge(Edge edge) {

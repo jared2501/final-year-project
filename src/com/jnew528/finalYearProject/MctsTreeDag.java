@@ -4,8 +4,9 @@ import com.jnew528.finalYearProject.DirectedAcyclicGraph.Edge;
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Node;
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Policies;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,7 +15,7 @@ import java.util.*;
  * Time: 4:49 PM
  * To change this template use File | Settings | File Templates.
  */
-public class MctsTreeUpdateAll implements MctsTree {
+public class MctsTreeDag implements MctsTree {
 	protected static Random random;
 	protected int collisions;
 
@@ -22,7 +23,7 @@ public class MctsTreeUpdateAll implements MctsTree {
 		random = new Random();
 	}
 
-	public MctsTreeUpdateAll() {}
+	public MctsTreeDag() {}
 
 	@Override
 	public Move search(GameState gameState, int iterationCount) {
@@ -78,14 +79,14 @@ public class MctsTreeUpdateAll implements MctsTree {
 			GameState finalGameState = defaultPolicy(node, startingGameState);
 
 			// Back propogate the result from the perspective of the player that just moved
-			backpropogate(node, finalGameState, traversedEdges);
+			Policies.backPropagatePath_ModifyAggAll(node, finalGameState, traversedEdges);
 			break;
 		} while(true);
 	}
 
 	protected Node utcSelect(Node node, Vector<Edge> traversedEdges) {
 		while(!node.hasUntriedMoves() && node.hasChildren()) {
-			Edge edge = Policies.uct2SelectChild(node);
+			Edge edge = Policies.uct2bSelectChild(node);
 			traversedEdges.add(edge);
 			node = edge.getHead();
 		}
@@ -102,48 +103,6 @@ public class MctsTreeUpdateAll implements MctsTree {
 			gameState = gameState.createChildStateFromMove(move);
 		}
 		return gameState;
-	}
-
-	protected void backpropogate(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
-		Deque<Node> currentLevelQueue = new ArrayDeque();
-		HashMap<Node, Double> currentLevelHash = new HashMap();
-
-		currentLevelQueue.addFirst(finalNode);
-		currentLevelHash.put(finalNode, 1.0);
-
-		while(currentLevelQueue.size() > 0) {
-			Deque<Node> nextLevelQueue = new ArrayDeque();
-			HashMap<Node, Double> nextLevelHash = new HashMap();
-
-			for(Node current : currentLevelQueue) {
-				Double currentVists = currentLevelHash.get(current);
-				Double currentResult = gameState.getResult(current.getGameState().getPlayerJustMoved(), false);
-
-				// Update the current node
-				current.update(currentResult*currentVists, currentVists);
-
-				double numOfParents = (double)current.getParentEdges().size();
-				Double parentVisits = currentVists/numOfParents;
-
-				// Go through its parents and dehoover their whatsits for next round
-				for(Edge e : current.getParentEdges()) {
-					// Update the current nodes parent edges with their parent score!
-					e.update(currentResult*parentVisits,parentVisits);
-
-					Node parent = e.getTail();
-
-					if(nextLevelHash.containsKey(parent)) {
-						nextLevelHash.put(parent, nextLevelHash.get(parent)+parentVisits);
-					} else {
-						nextLevelQueue.addFirst(parent);
-						nextLevelHash.put(parent, parentVisits);
-					}
-				}
-			}
-
-			currentLevelHash = nextLevelHash;
-			currentLevelQueue = nextLevelQueue;
-		}
 	}
 
 	@Override
