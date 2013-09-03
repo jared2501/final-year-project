@@ -28,16 +28,16 @@ public class Policies {
 		}
 
 		// Get parent visits
-		double parentVisits = node.visits;
+		double parentVisits = node.actualVisits;
 
 		// Find the highest uct edge from the child edges
 		Edge selectedEdge = node.childEdges.get(0);
-		double highestUctValue = Double.MIN_VALUE;
+		double highestUctValue = -Double.MAX_VALUE;
 
 		for(Edge e : node.childEdges) {
 			Node child = e.head;
 			double Qsa = child.wins / (child.visits + 1e-10);
-			double biasTerm = Math.sqrt((2*Math.log((double)parentVisits)) / (1e-6 + child.visits)) + random.nextDouble()*1e-6;
+			double biasTerm = Math.sqrt((2*Math.log((double)parentVisits)) / (1e-6 + child.actualVisits)) + random.nextDouble()*1e-6;
 			double newUctValue = Qsa + biasTerm;
 
 			if(newUctValue > highestUctValue) {
@@ -56,15 +56,15 @@ public class Policies {
 		}
 
 		// Get parent visits
-		double parentVisits = node.visits;
+		double parentVisits = node.actualVisits;
 
 		// Find the highest uct edge from the child edges
-		Edge selectedEdge = node.childEdges.get(0);
-		double highestUctValue = Double.MIN_VALUE;
+		Edge selectedEdge = null;
+		double highestUctValue = -Double.MAX_VALUE;
 
 		for(Edge e : node.childEdges) {
 			double Qsa = e.wins / (e.visits + 1e-10);
-			double biasTerm = Math.sqrt((Math.log((double)parentVisits)) / (1e-6 + e.visits)) + random.nextDouble()*1e-6;
+			double biasTerm = Math.sqrt((2*Math.log((double)parentVisits)) / (1e-6 + e.actualVisits)) + random.nextDouble()*1e-6;
 			double newUctValue = Qsa + biasTerm;
 
 			if(newUctValue > highestUctValue) {
@@ -83,11 +83,11 @@ public class Policies {
 		}
 
 		// Get parent visits
-		double parentVisits = node.visits;
+		double parentVisits = node.actualVisits;
 
 		// Find the highest uct edge from the child edges
-		Edge selectedEdge = node.childEdges.get(0);
-		double highestUctValue = Double.MIN_VALUE;
+		Edge selectedEdge = null;
+		double highestUctValue = -Double.MAX_VALUE;
 
 		for(Edge e : node.childEdges) {
 			Node child = e.head;
@@ -110,7 +110,7 @@ public class Policies {
 		}
 
 		// Get parent visits
-		double parentVisits = node.visits;
+		double parentVisits = node.actualVisits;
 
 		// Find the highest uct edge from the child edges
 		Edge selectedEdge = node.childEdges.get(0);
@@ -223,12 +223,12 @@ public class Policies {
 
 	public static void backpropogatePath(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
 		for(Edge e : traversedEdges) {
-            Node tail = e.getTail();
-
-			double edgeResult = gameState.getResult(tail.getGameState().getPlayerToMove(), false);
+			double edgeResult = gameState.getResult(e.getHead().getGameState().getPlayerJustMoved(), false);
 			e.updateEV(edgeResult, 1.0);
 			e.incrementVisits();
 
+			// Update tail since we update the final node below, so we need to update the root
+			Node tail = e.getTail();
             double tailResult = gameState.getResult(tail.getGameState().getPlayerJustMoved(), false);
             tail.updateEV(tailResult, 1.0);
             tail.incrementVisits();
@@ -324,7 +324,7 @@ public class Policies {
 
 	public static Move selectRobustRootMove(Node node) {
 		Move selectedMove = null;
-		int highestVisitCount = Integer.MIN_VALUE;
+		int highestVisitCount = -1;
 
 		for(Edge childEdge : node.getChildEdges()) {
 			if(childEdge.actualVisits > highestVisitCount) {
@@ -338,7 +338,7 @@ public class Policies {
 
     public static Move selectMaxRootMove(Node node) {
         Move selectedMove = null;
-        double highestValue = Double.MIN_VALUE;
+        double highestValue = -Double.MAX_VALUE;
 
         for(Edge childEdge : node.getChildEdges()) {
             if(childEdge.wins/(childEdge.visits + 1e-10) > highestValue) {

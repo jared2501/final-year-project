@@ -38,7 +38,7 @@ public class MctsTreeDag implements MctsTree {
 			performIteration(root, encounteredGameStates);
 		}
 
-		return Policies.selectMaxRootMove(root);
+		return Policies.selectRobustRootMove(root);
 	}
 
 	public void performIteration(Node root, HashMap<GameState, Node> encounteredGameStates) {
@@ -86,7 +86,7 @@ public class MctsTreeDag implements MctsTree {
 
 	protected Node utcSelect(Node node, Vector<Edge> traversedEdges) {
 		while(!node.hasUntriedMoves() && node.hasChildren()) {
-			Edge edge = Policies.uct2SelectChild(node);
+			Edge edge = Policies.uct1SelectChild(node);
 			traversedEdges.add(edge);
 			node = edge.getHead();
 		}
