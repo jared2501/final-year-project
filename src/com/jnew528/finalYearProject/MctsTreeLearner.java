@@ -6,7 +6,7 @@ import com.jnew528.finalYearProject.DirectedAcyclicGraph.Policies;
 
 import java.util.HashMap;
 
-public class MctsTreeLearner<T> extends MctsTreeUpdatePath {
+public class MctsTreeLearner<T> extends MctsTreeDag {
 
 	protected HashMap<GameState, Node> encounteredGameStates;
 

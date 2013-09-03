@@ -38,7 +38,7 @@ public class MctsTreeDag implements MctsTree {
 			performIteration(root, encounteredGameStates);
 		}
 
-		return Policies.selectRobustRootMove(root);
+		return Policies.selectMaxRootMove(root);
 	}
 
 	public void performIteration(Node root, HashMap<GameState, Node> encounteredGameStates) {
@@ -79,14 +79,14 @@ public class MctsTreeDag implements MctsTree {
 			GameState finalGameState = defaultPolicy(node, startingGameState);
 
 			// Back propogate the result from the perspective of the player that just moved
-			Policies.backPropagatePath_ModifyAggAll(node, finalGameState, traversedEdges);
+			Policies.backpropogatePath(node, finalGameState, traversedEdges);
 			break;
 		} while(true);
 	}
 
 	protected Node utcSelect(Node node, Vector<Edge> traversedEdges) {
 		while(!node.hasUntriedMoves() && node.hasChildren()) {
-			Edge edge = Policies.uct2bSelectChild(node);
+			Edge edge = Policies.uct2SelectChild(node);
 			traversedEdges.add(edge);
 			node = edge.getHead();
 		}

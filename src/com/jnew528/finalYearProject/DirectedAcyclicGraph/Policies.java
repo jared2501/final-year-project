@@ -92,7 +92,7 @@ public class Policies {
 		for(Edge e : node.childEdges) {
 			Node child = e.head;
 			double Qgsa = child.wins / (child.visits + 1e-10); // This is the main point that differs!
-			double biasTerm = Math.sqrt((2*Math.log((double)parentVisits)) / (1e-6 + e.visits)) + random.nextDouble()*1e-6;
+			double biasTerm = Math.sqrt((2*Math.log((double)parentVisits)) / (1e-6 + e.actualVisits)) + random.nextDouble()*1e-6;
 			double newUctValue = Qgsa + biasTerm;
 
 			if(newUctValue > highestUctValue) {
@@ -221,11 +221,17 @@ public class Policies {
 
     // Backpropagation
 
-	public static void backpropogateUpPath(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
+	public static void backpropogatePath(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
 		for(Edge e : traversedEdges) {
-			double result = gameState.getResult(e.getHead().getGameState().getPlayerJustMoved(), false);
-			e.updateEV(result, 1.0);
+            Node tail = e.getTail();
+
+			double edgeResult = gameState.getResult(tail.getGameState().getPlayerToMove(), false);
+			e.updateEV(edgeResult, 1.0);
 			e.incrementVisits();
+
+            double tailResult = gameState.getResult(tail.getGameState().getPlayerJustMoved(), false);
+            tail.updateEV(tailResult, 1.0);
+            tail.incrementVisits();
 		}
 
 		double result = gameState.getResult(finalNode.getGameState().getPlayerJustMoved(), false);
@@ -318,15 +324,29 @@ public class Policies {
 
 	public static Move selectRobustRootMove(Node node) {
 		Move selectedMove = null;
-		Double highestVisitCount = Double.MIN_VALUE;
+		int highestVisitCount = Integer.MIN_VALUE;
 
 		for(Edge childEdge : node.getChildEdges()) {
-			if(childEdge.visits > highestVisitCount) {
-				highestVisitCount = childEdge.visits;
+			if(childEdge.actualVisits > highestVisitCount) {
+				highestVisitCount = childEdge.actualVisits;
 				selectedMove = childEdge.move;
 			}
 		}
 
 		return selectedMove;
 	}
+
+    public static Move selectMaxRootMove(Node node) {
+        Move selectedMove = null;
+        double highestValue = Double.MIN_VALUE;
+
+        for(Edge childEdge : node.getChildEdges()) {
+            if(childEdge.wins/(childEdge.visits + 1e-10) > highestValue) {
+                highestValue = childEdge.wins/(childEdge.visits + 1e-10);
+                selectedMove = childEdge.move;
+            }
+        }
+
+        return selectedMove;
+    }
 }
