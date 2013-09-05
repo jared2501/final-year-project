@@ -79,14 +79,14 @@ public class MctsTreeDag2 implements MctsTree {
             GameState finalGameState = defaultPolicy(node, startingGameState);
 
             // Back propogate the result from the perspective of the player that just moved
-            Policies.backPropagatePath_ModifyAggAllNumChild(node, finalGameState, traversedEdges);
+            Policies.backPropagatePath(node, finalGameState, traversedEdges);
             break;
         } while(true);
     }
 
     protected Node utcSelect(Node node, Vector<Edge> traversedEdges) {
         while(!node.hasUntriedMoves() && node.hasChildren()) {
-            Edge edge = Policies.uct2SelectChild(node);
+            Edge edge = Policies.uctParameterizedSelectChild(node);
             traversedEdges.add(edge);
             node = edge.getHead();
         }

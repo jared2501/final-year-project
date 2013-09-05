@@ -13,13 +13,13 @@ public class Main {
 
 	public static void main(String[] args) throws Exception{
 		// Game type settings
-		int numberOfGames = 200;
+		int numberOfGames = 1000;
 		String gameType = "LeftRight";
 		int boardSize = 100;
 
 		// Iteration settings
 		int iterationsStart = 500;
-		int iterationsEnd = 1000;
+		int iterationsEnd = 500;
 		int iterationsStep = 500;
 		int maxNum = 100;
 
@@ -27,7 +27,7 @@ public class Main {
 		long unixTime = System.currentTimeMillis() / 1000L;
 		String newDirName = "Dropbox" + System.getProperty("file.separator") + "4thyearproj" + System.getProperty("file.separator") + unixTime +
 //				"_UpdateParameterized_" + gameType +
-				"_UpdatePathUct2_" + gameType +
+				"_test_" + gameType +
 				"_boardsize_" + boardSize +
 				"_numberOfGames_" + numberOfGames +
 				"_maxNum_" + maxNum +
@@ -45,7 +45,7 @@ public class Main {
 
 		PrintWriter resultsWriter = new PrintWriter(newDirName + System.getProperty("file.separator") + "results.m", "UTF-8");
 		int cores = Runtime.getRuntime().availableProcessors();
-		ExecutorService executor = Executors.newFixedThreadPool(8);
+		ExecutorService executor = Executors.newFixedThreadPool(2);
 		Vector<Future<Vector<Double>>> futures = new Vector();
 
 		int i = 0;

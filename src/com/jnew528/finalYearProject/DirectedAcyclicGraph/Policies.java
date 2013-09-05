@@ -132,6 +132,54 @@ public class Policies {
 	}
 
 
+	public static Edge uct3SelectChild(Node node) {
+		if(node.childEdges.size() == 0) {
+			return null;
+		}
+
+		// Get parent visits
+		double parentVisits = node.actualVisits;
+
+		// Find the highest uct edge from the child edges
+		Edge selectedEdge = node.childEdges.get(0);
+		double highestUctValue = Double.MIN_VALUE;
+
+		for(Edge e : node.childEdges) {
+			Node child = e.head;
+			double Qgsa = uct3(e.getHead(), e.getHead().getGameState().getPlayerJustMoved()); // This is the main point that differs!
+			double biasTerm = Math.sqrt((2*Math.log((double)parentVisits)) / (1e-6 + child.actualVisits)) + random.nextDouble()*1e-6;
+			double newUctValue = Qgsa + biasTerm;
+
+			if(newUctValue > highestUctValue) {
+				highestUctValue = newUctValue;
+				selectedEdge = e;
+			}
+		}
+
+		return selectedEdge;
+	}
+
+	private static double uct3(Node node, int playerJustMoved) {
+		if(node.getChildEdges().size() < 1) {
+			if(playerJustMoved == node.getGameState().getPlayerJustMoved()) {
+				return node.wins/(node.visits + 1e-10);
+			} else {
+				return 1-(node.wins/(node.visits + 1e-10));
+			}
+		} else {
+			double sum = 0.0;
+
+			for(Edge e : node.getChildEdges()) {
+				Node child = e.getHead();
+				sum = sum + (e.actualVisits*uct3(child, playerJustMoved))/(node.actualVisits + 1e-6);
+			}
+
+			return sum;
+		}
+	}
+
+
+
 	public static Edge uctParameterizedSelectChild(Node node) {
 		if(node.childEdges.size() == 0) {
 			return null;
@@ -144,8 +192,8 @@ public class Policies {
 
 		for(Edge e : node.childEdges) {
 			int d1 = 10000;
-			int d2 = 1;
-			int d3 = 1;
+			int d2 = 2;
+			int d3 = 2;
 			double c = 1;
 
 			double newUctValue = mu(d1, e, player) + c * Math.sqrt((Math.log(p(d2,e)))/(n(d3, e) + 1e-10)) + random.nextDouble()*1e-6;
@@ -221,7 +269,7 @@ public class Policies {
 
     // Backpropagation
 
-	public static void backpropogatePath(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
+	public static void backPropagatePath(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
 		for(Edge e : traversedEdges) {
 			double edgeResult = gameState.getResult(e.getHead().getGameState().getPlayerJustMoved(), false);
 			e.updateEV(edgeResult, 1.0);
@@ -289,6 +337,7 @@ public class Policies {
 		finalNode.incrementVisits();
 	}
 
+
 	public static void backPropagatePath_ModifyAggAll(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
 		HashSet<Node> seenNodes = new HashSet();
 		Deque<Node> stack = new ArrayDeque();
@@ -320,6 +369,91 @@ public class Policies {
 		}
 		finalNode.incrementVisits();
 	}
+
+
+//	public static void backPropagatePath_UCT3fail(Node finalNode, GameState gameState, Vector<Edge> traversedEdges) {
+//
+//
+//		// Increment visits along path for bias term
+//		for(Edge e : traversedEdges) {
+//			e.incrementVisits();
+//			e.getTail().incrementVisits();
+//		}
+//		finalNode.incrementVisits();
+//
+//		// Update aggregations
+//		Set<Node> traversedNodesSet = new HashSet();
+//		for(Edge e : traversedEdges) {
+//			traversedNodesSet.add(e.getTail());
+//		}
+//		traversedNodesSet.add(finalNode);
+//
+//		Deque<Node> currentLevelQueue = new ArrayDeque();
+//		HashMap<Node, Double> deltaQChildren = new HashMap();
+//
+//		currentLevelQueue.addFirst(finalNode);
+//
+//		while(currentLevelQueue.size() > 0) {
+//			HashMap<Node, Double> deltaQCurrent = new HashMap<Node, Double>();
+//			Deque<Node> nextLevelQueue = new ArrayDeque();
+//
+//			Set<Node> nextLevelSet = new HashSet<Node>();
+//
+//			for(Node current : currentLevelQueue) {
+//				double deltaQ;
+//
+//				if(finalNode == current) {
+//					deltaQ = gameState.getResult(finalNode.getGameState().getPlayerJustMoved(), false);
+//				} else if(traversedNodesSet.contains(current)) {
+//					Node gsa = null;
+//
+//					for(Edge e : traversedEdges) {
+//						if(current == e.getTail()) {
+//							gsa = e.getTail();
+//							break;
+//						}
+//					}
+//
+//					deltaQ = (1.0-(gsa.wins/gsa.visits))/current.actualVisits;
+//				} else {
+//					deltaQ = 0;
+//					for(Edge e : current.getChildEdges()) {
+//						if(deltaQChildren.containsKey(e.getHead())) {
+//							double deltaQgsa = (1-deltaQChildren.get(e.getHead()));
+//							deltaQ = deltaQ + (e.actualVisits*deltaQgsa)/current.actualVisits;
+//						}
+//					}
+//				}
+//
+//				if(current.visits < 0.5) {
+//					current.updateEV(deltaQ, 1.0);
+//				} else {
+//					current.updateEV(deltaQ, 1.0);
+//				}
+//				deltaQCurrent.put(current, deltaQ);
+//
+//				// Go through its parents and dehoover their whatsits for next round
+//				for(Edge e : current.getParentEdges()) {
+//					// Update the current nodes parent edges with their parent score!
+//					if(e.visits < 0.5) {
+//						e.updateEV(deltaQ, 1.0);
+//					} else {
+//						e.updateEV(deltaQ, 1.0);
+//					}
+//
+//					Node parent = e.getTail();
+//
+//					if(!nextLevelSet.contains(parent) && (e.actualVisits > 0 || traversedNodesSet.contains(parent))) {
+//						nextLevelSet.add(parent);
+//						nextLevelQueue.addFirst(parent);
+//					}
+//				}
+//			}
+//
+//			deltaQChildren = deltaQCurrent;
+//			currentLevelQueue = nextLevelQueue;
+//		}
+//	}
 
 
 	public static Move selectRobustRootMove(Node node) {

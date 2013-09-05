@@ -37,11 +37,14 @@ public class MctsTreeStd implements MctsTree {
 
 	public void performIteration(Node root) {
 		Node node = root;
+		Vector<Edge> traversedEdges = new Vector();
 
 		// Traverse the tree until we reach an expandable node
 		// ie a node that has untried moves and non-terminal
 		while(!node.hasUntriedMoves() && node.hasChildren()) {
-			node = Policies.uct0SelectChild(node).getHead();
+			Edge e = Policies.uct0SelectChild(node);
+			traversedEdges.add(e);
+			node = e.getHead();
 		}
 
 		// Expand the node if it has untried moves
@@ -52,7 +55,8 @@ public class MctsTreeStd implements MctsTree {
 
 			// Remove the move that we used to expand the node and add the new node generated to the tree
 			Node newNode = new Node(newGameState);
-			node.addChild(newNode, move);
+			Edge newEdge = node.addChild(newNode, move);
+			traversedEdges.add(newEdge);
 			node = newNode;
 		}
 
@@ -65,26 +69,7 @@ public class MctsTreeStd implements MctsTree {
 			gameState = gameState.createChildStateFromMove(move);
 		}
 
-		// Back propogate the result from the perspective of the player that just moved
-		// Were using updateall so update the nodes!!!
-		do {
-			double result = gameState.getResult(node.getGameState().getPlayerJustMoved(), true);
-			node.updateEV(result, 1.0);
-			node.incrementVisits();
-
-			// Since each node should only have one parent edge!
-			assert(node.getParentEdges().size() == 1 || node.getParentEdges().size() == 0);
-
-			if(node.getParentEdges().size() == 0) {
-				break;
-			} else {
-				// Update the edge as well for shits and giggles
-				Edge parentEdge = node.getParentEdges().get(0);
-				parentEdge.updateEV(result, 1.0);
-				parentEdge.incrementVisits();
-				node = parentEdge.getTail();
-			}
-		} while (true);
+		Policies.backPropagatePath(node, gameState, traversedEdges);
 	}
 
 	public int getCollisions() {

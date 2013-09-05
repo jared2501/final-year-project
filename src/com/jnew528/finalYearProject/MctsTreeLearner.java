@@ -1,6 +1,5 @@
 package com.jnew528.finalYearProject;
 
-import com.jnew528.finalYearProject.DirectedAcyclicGraph.Edge;
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Node;
 import com.jnew528.finalYearProject.DirectedAcyclicGraph.Policies;
 
@@ -35,6 +34,6 @@ public class MctsTreeLearner<T> extends MctsTreeDag {
 			performIteration(root, encounteredGameStates);
 		}
 
-		return Policies.selectRobustRootMove(root);
+		return gameState.convertMove(root.getGameState(), Policies.selectRobustRootMove(root));
 	}
 }

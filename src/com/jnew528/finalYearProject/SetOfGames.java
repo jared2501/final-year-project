@@ -31,8 +31,8 @@ public class SetOfGames implements Callable<Vector<Double>> {
 		long startTime = System.nanoTime();
 		Vector<Double> output = new Vector<Double>();
 
-		MctsTree playerControl = new MctsTreeStd();
-		MctsTree playerTesting = new MctsTreeDag();
+		MctsTree playerControl = new MctsTreeDag();
+		MctsTree playerTesting = new MctsTreeLearner();
 
 		// Write the results to a file as we get them
 		double extendedPlayerWins = 0;
